@@ -2,12 +2,13 @@ import { addCharacter, getCharacters } from '../models/characters.js'
 
 const abilities = ['str', 'dex', 'con', 'int', 'wis', 'cha']
 
-export function getCharacterCollection() {
+export async function getCharacterCollection() {
   return getCharacters()
 }
 
-export function getCharacterById(id) {
-  return getCharacters().find((character) => character.id === id) ?? null
+export async function getCharacterById(id) {
+  const characters = await getCharacters()
+  return characters.find((character) => character.id === id) ?? null
 }
 
 export function createCharacter(formData) {

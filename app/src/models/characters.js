@@ -1,36 +1,51 @@
 const STORAGE_KEY = 'dndbook.characters'
+const CHARACTERS_API_URL = '/api/characters/'
 
-const defaultCharacters = [
-  {
-    id: 'mira-thorn',
-    name: 'Mira Thorn',
-    ancestry: 'Wood Elf',
-    characterClass: 'Ranger',
-    level: 4,
-    stats: { str: 10, dex: 16, con: 13, int: 12, wis: 15, cha: 8 },
-    detail: 'Verhaal van Matthijs',
-  },
-  {
-    id: 'bram-stoneward',
-    name: 'Bram Stoneward',
-    ancestry: 'Mountain Dwarf',
-    characterClass: 'Paladin',
-    level: 3,
-    stats: { str: 16, dex: 10, con: 14, int: 10, wis: 12, cha: 14 },
-    detail: 'Verhaal van Bart',
-  },
-]
-
-export function getCharacters() {
+function getLocallyAddedCharacters() {
   try {
     const storedCharacters = localStorage.getItem(STORAGE_KEY)
-    return storedCharacters ? JSON.parse(storedCharacters) : defaultCharacters
+    return storedCharacters ? JSON.parse(storedCharacters) : []
   } catch {
-    return defaultCharacters
+    return []
   }
 }
 
+export async function getCharacters() {
+  const response = await fetch(CHARACTERS_API_URL)
+  if (!response.ok) {
+    throw new Error(`Could not load characters (HTTP ${response.status}).`)
+  }
+
+  const payload = await response.json()
+  const apiCharacters = Array.isArray(payload) ? payload : payload.value
+  if (!Array.isArray(apiCharacters)) {
+    throw new Error('The characters API returned an unexpected response.')
+  }
+
+  const characters = apiCharacters.map((character) => ({
+    id: String(character.id),
+    name: character.name,
+    ancestry: character.race,
+    characterClass: character.class,
+    level: character.level,
+    stats: {
+      str: character.strength,
+      dex: character.dexterity,
+      con: character.constitution,
+      int: character.intelligence,
+      wis: character.wisdom,
+      cha: character.charisma,
+    },
+    detail: character.background,
+  }))
+
+  return [...characters, ...getLocallyAddedCharacters()]
+}
+
 export function addCharacter(character) {
-  const characters = [...getCharacters(), { ...character, id: crypto.randomUUID() }]
+  const characters = [
+    ...getLocallyAddedCharacters(),
+    { ...character, id: crypto.randomUUID() },
+  ]
   localStorage.setItem(STORAGE_KEY, JSON.stringify(characters))
 }

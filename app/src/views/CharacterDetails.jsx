@@ -1,5 +1,6 @@
 import { Link, useParams } from 'react-router-dom'
 import AppHeader from '../components/AppHeader.jsx'
+import { useEffect, useState } from 'react'
 import { getAbilityModifier, getCharacterById } from '../controllers/characterController.js'
 
 const abilities = [
@@ -13,7 +14,31 @@ const abilities = [
 
 function CharacterDetails() {
   const { id } = useParams()
-  const character = getCharacterById(id)
+  const [result, setResult] = useState({ id: null, character: null, error: '' })
+  const isCurrentResult = result.id === id
+  const character = isCurrentResult ? result.character : null
+  const error = isCurrentResult ? result.error : ''
+  const isLoading = !isCurrentResult
+
+  useEffect(() => {
+    let isMounted = true
+
+    getCharacterById(id)
+      .then((loadedCharacter) => {
+        if (isMounted) {
+          setResult({ id, character: loadedCharacter, error: '' })
+        }
+      })
+      .catch((loadError) => {
+        if (isMounted) {
+          setResult({ id, character: null, error: loadError.message })
+        }
+      })
+
+    return () => {
+      isMounted = false
+    }
+  }, [id])
 
   return (
     <div className="app-shell">
@@ -22,7 +47,11 @@ function CharacterDetails() {
       <main className="container workspace character-sheet">
         <Link className="character-back-link" to="/collection">Back to collection</Link>
 
-        {character ? (
+        {isLoading ? (
+          <p role="status">Loading character...</p>
+        ) : error ? (
+          <p role="alert">Unable to load character: {error}</p>
+        ) : character ? (
           <>
             <header className="character-sheet-header">
               <p className="workspace-eyebrow">Level {character.level} adventurer</p>
