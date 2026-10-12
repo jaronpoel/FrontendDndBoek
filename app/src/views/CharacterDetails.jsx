@@ -1,6 +1,6 @@
 import { Link, useParams } from 'react-router-dom'
 import AppHeader from '../components/AppHeader.jsx'
-import { getCharacters } from '../models/characters.js'
+import { getAbilityModifier, getCharacterById } from '../controllers/characterController.js'
 
 const abilities = [
   ['str', 'Strength'],
@@ -11,14 +11,9 @@ const abilities = [
   ['cha', 'Charisma'],
 ]
 
-function formatModifier(score) {
-  const modifier = Math.floor((Number(score) - 10) / 2)
-  return `${modifier >= 0 ? '+' : ''}${modifier}`
-}
-
 function CharacterDetails() {
   const { id } = useParams()
-  const character = getCharacters().find((entry) => entry.id === id)
+  const character = getCharacterById(id)
 
   return (
     <div className="app-shell">
@@ -50,7 +45,10 @@ function CharacterDetails() {
                       <div className="character-sheet-stat" key={key}>
                         <dt>{label}</dt>
                         <dd>{score}</dd>
-                        <span>Modifier {formatModifier(score)}</span>
+                        <span>
+                          Modifier {getAbilityModifier(score) >= 0 ? '+' : ''}
+                          {getAbilityModifier(score)}
+                        </span>
                       </div>
                     )
                   })}

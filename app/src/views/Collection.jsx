@@ -1,9 +1,9 @@
 import AppHeader from '../components/AppHeader.jsx'
-import { getCharacters } from '../models/characters.js'
 import { Link } from 'react-router-dom'
+import { getCharacterCollection } from '../controllers/characterController.js'
 
 function Collection() {
-  const characters = getCharacters()
+  const characters = getCharacterCollection()
 
   return (
     <div className="app-shell">

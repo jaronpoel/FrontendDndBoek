@@ -1,7 +1,7 @@
 import AppHeader from '../components/AppHeader.jsx'
 import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { addCharacter } from '../models/characters.js'
+import { createCharacter } from '../controllers/characterController.js'
 
 function AddCharacter() {
   const navigate = useNavigate()
@@ -10,27 +10,12 @@ function AddCharacter() {
   function handleSubmit(event) {
     event.preventDefault()
 
-    const formData = new FormData(event.currentTarget)
-    const character = {
-      name: formData.get('name').trim(),
-      ancestry: formData.get('ancestry').trim(),
-      characterClass: formData.get('characterClass').trim(),
-      level: Number(formData.get('level')),
-      stats: Object.fromEntries(
-        ['str', 'dex', 'con', 'int', 'wis', 'cha'].map((ability) => [
-          ability,
-          Number(formData.get(ability)),
-        ]),
-      ),
-      detail: formData.get('detail').trim() || 'No background added yet.',
-    }
-
-    if (!character.name || !character.ancestry || !character.characterClass) {
-      setFormError('Fill in the name, ancestry, and class to continue.')
+    const error = createCharacter(new FormData(event.currentTarget))
+    if (error) {
+      setFormError(error)
       return
     }
 
-    addCharacter(character)
     navigate('/collection')
   }
 
