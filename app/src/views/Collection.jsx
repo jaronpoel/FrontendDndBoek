@@ -1,23 +1,10 @@
 import AppHeader from '../components/AppHeader.jsx'
-
-const characters = [
-  {
-    name: 'Mira Thorn',
-    ancestry: 'Wood Elf',
-    characterClass: 'Ranger',
-    level: 4,
-    detail: 'A quiet pathfinder with an uncanny sense for old trails.',
-  },
-  {
-    name: 'Bram Stoneward',
-    ancestry: 'Mountain Dwarf',
-    characterClass: 'Paladin',
-    level: 3,
-    detail: 'A steadfast guardian sworn to protect the overlooked.',
-  },
-]
+import { getCharacters } from '../models/characters.js'
+import { Link } from 'react-router-dom'
 
 function Collection() {
+  const characters = getCharacters()
+
   return (
     <div className="app-shell">
       <AppHeader />
@@ -26,18 +13,37 @@ function Collection() {
         <h1>Collection</h1>
         <div className="row g-4 character-grid">
           {characters.map((character) => (
-            <div className="col-12 col-md-6" key={character.name}>
-              <article className="card character-card h-100">
-                <div className="card-body">
-                  <p className="character-level">Level {character.level}</p>
-                  <h2 className="character-name">{character.name}</h2>
-                  <p className="character-type">
-                    {character.ancestry} <span aria-hidden="true">/</span>{' '}
-                    {character.characterClass}
-                  </p>
-                  <p className="character-detail">{character.detail}</p>
-                </div>
-              </article>
+            <div className="col-12 col-md-6" key={character.id}>
+              <Link className="character-card-link" to={`/character/${character.id}`}>
+                <article className="card character-card h-100">
+                  <div className="card-body">
+                    <p className="character-level">Level {character.level}</p>
+                    <h2 className="character-name">{character.name}</h2>
+                    <p className="character-type">
+                      {character.ancestry} <span aria-hidden="true">/</span>{' '}
+                      {character.characterClass}
+                    </p>
+                    {character.stats && (
+                      <dl className="character-ability-scores">
+                        {[
+                          ['STR', character.stats.str],
+                          ['DEX', character.stats.dex],
+                          ['CON', character.stats.con],
+                          ['INT', character.stats.int],
+                          ['WIS', character.stats.wis],
+                          ['CHA', character.stats.cha],
+                        ].map(([ability, score]) => (
+                          <div className="character-ability-score" key={ability}>
+                            <dt>{ability}</dt>
+                            <dd>{score}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                    )}
+                    <p className="character-detail">{character.detail}</p>
+                  </div>
+                </article>
+              </Link>
             </div>
           ))}
         </div>
